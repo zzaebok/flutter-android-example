@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -9,11 +12,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter - Android Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter - Android Demo Home Page'),
     );
   }
 }
@@ -28,11 +31,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  
+  // MethodChannel
+  static const platform = MethodChannel("com.example.example/message");
 
-  void _incrementCounter() {
+  // Message
+  String _message = "Initial message";
+
+  // Invoke Method
+  Future<void> _getMessage() async {
+    String message;
+    try {
+      message = await platform.invokeMethod('getMessageAndroid');
+    } on PlatformException {
+      message = "Failed to get message from Android";
+    }
+
     setState(() {
-      _counter++;
+      _message = message;
     });
   }
 
@@ -46,20 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            Text(_message),
+            ElevatedButton(onPressed: _getMessage, child: const Text("Get message"))
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
